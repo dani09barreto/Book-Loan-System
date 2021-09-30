@@ -7,7 +7,9 @@
 #include <unistd.h>
 #include <unistd.h>
 #include "book.h"
+
 void createPipe(char *receptorPipe , book bookRequest){
+
   int fd;
   int create = 0;
   int verify;
@@ -57,10 +59,16 @@ int main(int argc, char *argv[]) {
     printf("ej: ./center –i file –p fileReceptor \n");
     exit (0);
   }
-  book bookRequest;  
+  book bookRequest;
+
+  bookRequest.ISBN = 1234;
+  bookRequest.operation = 'P';
+  stpcpy(bookRequest.name, "hola");
+  stpcpy(bookRequest.secondpipe, "pipepersonal");
+
   //abre el pipe verde
   createPipe(argv[1],bookRequest);
-    //crea el pipe personal y manda la info de la solicitud
+  //crea el pipe personal y manda la info de la solicitud
   //manda info y espera la respuesta
 
   return 0;
