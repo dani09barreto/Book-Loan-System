@@ -11,9 +11,9 @@
 
 
 void requestBook (char *fileSecondpipe, int fd){
-
+    int make = 0;
     do{
-        if ((fd = open (fileSecondpipe, O_WDONLY)) == -1){
+        if ((fd = open (fileSecondpipe, O_WRONLY)) == -1){
             perror("Receptor abriendo el pipe respuesta\n");
             perror("Se intentara mas tarde\n");
             sleep(5);
@@ -29,8 +29,9 @@ void requestBook (char *fileSecondpipe, int fd){
 
 void returnBook (char *fileSecondpipe, int fd){
 
+    int make = 0;
     do{
-        if ((fd = open (fileSecondpipe, O_WDONLY)) == -1){
+        if ((fd = open (fileSecondpipe, O_WRONLY)) == -1){
             perror("Receptor abriendo el pipe respuesta\n");
             perror("Se intentara mas tarde\n");
             sleep(5);
@@ -45,9 +46,9 @@ void returnBook (char *fileSecondpipe, int fd){
 }
 
 void renovateBook (char *fileSecondpipe, int fd){
-
+    int make = 0;
     do{
-        if ((fd = open (fileSecondpipe, O_WDONLY)) == -1){
+        if ((fd = open (fileSecondpipe, O_WRONLY)) == -1){
             perror("Receptor abriendo el pipe respuesta\n");
             perror("Se intentara mas tarde\n");
             sleep(5);
@@ -75,14 +76,14 @@ int main(int argc, char *argv[]){
 
     int fd, fd1, pid, n, bytes, res, make = 0;
     char *filepipe = argv[2];
-    book request;
+    book bookRequest;
     
     //crea el pipe receptor y lo abre
-    mode_t fifo_mode = S_IRUSR | S_IWURS;
+    mode_t fifo_mode = S_IRUSR | S_IWUSR;
 
     unlink(filepipe);
     if (mkfifo(filepipe, fifo_mode) == -1){
-        perror("Server mkfifo\n");
+        perror("Receptor mkfifo\n");
         exit (0);
     }
 
@@ -93,7 +94,7 @@ int main(int argc, char *argv[]){
     printf("Se abrio el pipe receptor\n");
 
     // lee lo que commandCenter le manda y lo guarda en request
-    bytes = read (fp, &request, sizeof(book));
+    bytes = read (fd, &bookRequest, sizeof(book));
 
     if (bytes == -1){
         perror ("Error al leer el pipe");
@@ -103,23 +104,23 @@ int main(int argc, char *argv[]){
 
     //Identifica cual es el proceso a realizar D: Devolver, P: Pedir, R: Renovar
 
-    switch (request.operation){
+    switch (bookRequest.operation){
 
     case 'P':
-        requestBook(&request.secondpipe, fd1);
+        requestBook(&bookRequest.secondpipe, fd1);
         break;
     case 'D':
-        returnBook(&request.secondpipe, fd1);
+        returnBook(&bookRequest.secondpipe, fd1);
         break;
     case 'R':
-        returnBook(&request.secondpipe, fd1);
+        returnBook(&bookRequest.secondpipe, fd1);
         break;
     default:
         printf("Accion no se puede realizar\n");
         break;
     }
 
-    printf("receptor a termindado")
+    printf("receptor a termindado");
 
     return 0;
 }
