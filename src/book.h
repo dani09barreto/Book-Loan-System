@@ -3,12 +3,9 @@
 #define MAXNAME 20
 
 typedef struct Book{
+    char operation;
     char name [MAXNAME];
     int ISBN;
-    int copies;
+    char secondpipe[MAXNAME];
 }book;
 
-typedef struct Data{
-    char secondpipe[MAXNAME];
-    int pid;
-}data;
