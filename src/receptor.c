@@ -28,6 +28,7 @@ void requestBook (char *fileSecondpipe, int fd){
 void returnBook (char *fileSecondpipe, int fd){
 
     int make = 0;
+
     do{
         if ((fd = open (fileSecondpipe, O_WRONLY)) == -1){
             perror("Receptor abriendo el pipe respuesta\n");
@@ -78,8 +79,8 @@ int main(int argc, char *argv[]){
     
     //crea el pipe receptor y lo abre
     mode_t fifo_mode = S_IRUSR | S_IWUSR;
-
-    unlink(filepipe);
+    
+    unlink (filepipe);
     if (mkfifo(filepipe, fifo_mode) == -1){
         perror("Receptor mkfifo");
         exit (0);
