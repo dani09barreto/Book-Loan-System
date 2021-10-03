@@ -9,117 +9,135 @@
 
 
 void requestBook (char *fileSecondpipe, int fd){
-    int make = 0;
-    do{
-        if ((fd = open (fileSecondpipe, O_WRONLY)) == -1){
-            perror("Receptor abriendo el pipe respuesta\n");
-            perror("Se intentara mas tarde\n");
-            sleep(5);
-        }
-        else{
-            make = 1;
-        }
-    }while(make == 0);
-    printf("Proceso receptor envia respuesta a pipe del proceso solicitud\n");
-    write(fd, 1, sizeof(int));
-    close (fd);
+   
+   int make = 0;
+   printf("Se abre %s para enviar la respuesta a la solicitud\n", fileSecondpipe);
+   printf("---------------------\n");
+   
+   do{
+      if ((fd = open (fileSecondpipe, O_WRONLY)) == -1){
+         perror("Receptor abriendo el pipe respuesta\n");
+         perror("Se intentara mas tarde\n");
+         sleep(5);
+      }
+      else{
+         make = 1;
+      }
+   }while(make == 0);
+   printf("Proceso receptor envia respuesta a pipe del proceso solicitud\n");
+   write(fd, "1", 10);
 }
 
 void returnBook (char *fileSecondpipe, int fd){
 
-    int make = 0;
+   int make = 0;
 
-    do{
-        if ((fd = open (fileSecondpipe, O_WRONLY)) == -1){
-            perror("Receptor abriendo el pipe respuesta\n");
-            perror("Se intentara mas tarde\n");
-            sleep(5);
-        }
-        else{
-            make = 1;
-        }
-    }while(make == 0);
-    printf("Proceso receptor envia respuesta a pipe del proceso solicitud\n");
-    write(fd, 1, sizeof(int));
-    close (fd);
+   printf("Se abre %s para enviar la respuesta a la solicitud\n", fileSecondpipe);
+   printf("---------------------\n");
+   do{
+      if ((fd = open (fileSecondpipe, O_WRONLY)) == -1){
+         perror("Receptor abriendo el pipe respuesta\n");
+         perror("Se intentara mas tarde\n");
+         sleep(5);
+      }
+      else{
+         make = 1;
+      }
+   }while(make == 0);
+   printf("Proceso receptor envia respuesta a pipe del proceso solicitud\n");
+   write(fd, "1", 10);
 }
 
 void renovateBook (char *fileSecondpipe, int fd){
-    int make = 0;
-    do{
-        if ((fd = open (fileSecondpipe, O_WRONLY)) == -1){
-            perror("Receptor abriendo el pipe respuesta\n");
-            perror("Se intentara mas tarde\n");
-            sleep(5);
-        }
-        else{
-            make = 1;
-        }
-    }while(make == 0);
-    printf("Proceso receptor envia respuesta a pipe del proceso solicitud\n");
-    write(fd, 1, sizeof(int));
-    close (fd);
+    
+   int make = 0;
+
+   printf("Se abre %s para enviar la respuesta a la solicitud\n", fileSecondpipe);
+   printf("---------------------\n");
+   do{
+      if ((fd = open (fileSecondpipe, O_WRONLY)) == -1){
+         perror("Receptor abriendo el pipe respuesta\n");
+         perror("Se intentara mas tarde\n");
+         sleep(5);
+      }
+      else{
+         make = 1;
+      }
+   }while(make == 0);
+   printf("Proceso receptor envia respuesta a pipe del proceso solicitud\n");
+   write(fd, "1", 10);
 }
 
-int main(int argc, char *argv[]){
+int main (int argc, char *argv[]){
 
-    //codigo del servidor
+   int  fd, fd1, bytes,create = 0;
+   book bookRequest;
+   mode_t fifo_mode = S_IRUSR | S_IWUSR;
+  
+   if (argc != 7){
+      perror("Numero de argumentos invalidos\n");
+      printf("ej: ./receptor –p nombrepipe –f filedatos –s filesalida\n");
+      exit (0);
+   }
 
-    //recibe los argumentos
+   printf("Se crea el pipe %s para recibir solicitud\n", argv[2]);
+   printf("---------------------\n");
+   unlink(argv[2]);
+   if (mkfifo (argv[2], fifo_mode) == -1) {
+      perror("Server mkfifo");
+      exit(1);
+   }
+   
+   printf("Se esta abriendo el pipe %s para recibir solicitud\n", argv[2]);
+   printf("---------------------\n");
+   if ((fd = open(argv[2], O_RDONLY)) == -1){
+      perror("Error al abrir el pipe\n");
+      exit (0);
+   }
 
-    if (argc != 7){
-        perror("Numero de argumentos invalidos\n");
-        printf("ej: ./receptor –p nombrepipe –f filedatos –s filesalida\n");
-        exit (0);
-    }
+   printf("Se abrio %s \n", argv[2]);
+   printf("---------------------\n");
+   printf("Se esta leyendo la solicitud que manda el PS\n"); 
 
-    int fd, fd1, pid, n, bytes, res, make = 0;
-    char *filepipe = argv[2];
-    book bookRequest;
-    
-    //crea el pipe receptor y lo abre
-    mode_t fifo_mode = S_IRUSR | S_IWUSR;
-    
-    unlink (filepipe);
-    if (mkfifo(filepipe, fifo_mode) == -1){
-        perror("Receptor mkfifo");
-        exit (0);
-    }
+   bytes = read (fd, &bookRequest, sizeof(bookRequest));
+   if (bytes == -1) {
+      perror("proceso lector:");
+      exit(1);
+   }
 
-    if (fd = open(filepipe, O_RDONLY) == -1){
-        perror("Error al abrir el pipe\n");
-        exit (0);
-    }
-    printf("Se abrio el pipe receptor\n");
+   printf("Se lee %s %i %c %s en %s\n", bookRequest.name, bookRequest.ISBN, bookRequest.operation, bookRequest.secondpipe, argv[2]);
+   printf("---------------------\n");
+   
+   do { 
+      if ((fd1 = open(bookRequest.secondpipe, O_WRONLY)) == -1) {
+         perror(" Server Abriendo el segundo pipe ");
+         printf(" Se volvera a intentar despues\n");
+         sleep(5);
+      } else create = 1; 
+   }  while (create == 0);
 
-    // lee lo que commandCenter le manda y lo guarda en request
-    bytes = read (fd, &bookRequest, sizeof(book));
+   switch (bookRequest.operation){
 
-    if (bytes == -1){
-        perror ("Error al leer el pipe");
-        exit (0);
-    }
-    printf("El proceso receptor recibio la solicitud\n");
+   case 'P':
+      requestBook(&bookRequest.secondpipe, fd1);
+      break;
+   case 'D':
+      returnBook(&bookRequest.secondpipe, fd1);
+      break;
+   case 'R':
+      returnBook(&bookRequest.secondpipe, fd1);
+      break;
+   default:
+      printf("Accion no se puede realizar\n");
+      break;
+   }
 
-    //Identifica cual es el proceso a realizar D: Devolver, P: Pedir, R: Renovar
-
-    switch (bookRequest.operation){
-
-    case 'P':
-        requestBook(&bookRequest.secondpipe, fd1);
-        break;
-    case 'D':
-        returnBook(&bookRequest.secondpipe, fd1);
-        break;
-    case 'R':
-        returnBook(&bookRequest.secondpipe, fd1);
-        break;
-    default:
-        printf("Accion no se puede realizar\n");
-        break;
-    }
-
-    printf("receptor a termindado");
-
-    return 0;
+   printf("receptor a termindado\n");
+   
+   exit(0);
 }
+
+
+
+
+
