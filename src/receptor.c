@@ -24,6 +24,7 @@ void requestBook (char *fileSecondpipe, int fd){
          make = 1;
       }
    }while(make == 0);
+   
    printf("Proceso receptor envia respuesta a pipe del proceso solicitud\n");
    write(fd, "1", 10);
 }
