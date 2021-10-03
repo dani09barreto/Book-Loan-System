@@ -84,7 +84,7 @@ int main (int argc, char *argv[]){
    printf("---------------------\n");
    unlink(argv[2]);
    if (mkfifo (argv[2], fifo_mode) == -1) {
-      perror("Server mkfifo");
+      perror("Receptor mkfifo");
       exit(1);
    }
    
@@ -110,8 +110,8 @@ int main (int argc, char *argv[]){
    
    do { 
       if ((fd1 = open(bookRequest.secondpipe, O_WRONLY)) == -1) {
-         perror(" Server Abriendo el segundo pipe ");
-         printf(" Se volvera a intentar despues\n");
+         perror("Receptor Abriendo el segundo pipe\n");
+         printf("Se volvera a intentar despues\n");
          sleep(5);
       } else create = 1; 
    }  while (create == 0);
@@ -131,8 +131,6 @@ int main (int argc, char *argv[]){
       printf("Accion no se puede realizar\n");
       break;
    }
-
-   printf("receptor a termindado\n");
    
    exit(0);
 }

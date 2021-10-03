@@ -51,7 +51,7 @@ void createpipe (char *namepipe, book bookRequest){
    create = 0;
    do { 
       if ((fd = open(bookRequest.secondpipe, O_RDONLY)) == -1) {
-         perror(" Cliente  Abriendo el segundo pipe. Se volvera a intentar ");
+         perror("Command Center Abriendo el segundo pipe. Se volvera a intentar\n");
          sleep(5);
       } else create = 1; 
    } while (create == 0);
@@ -80,6 +80,9 @@ int main (int argc, char *argv[]){
   }
    book bookRequest;
 
+   //LLenado de la instancia del libro
+   //se debe hacer esto cada vez que se quiera crear una nueva solicitud y aumentar numPS
+   //ya que lleva el num de proceso ej. PS1 PS2 y asi
    strcpy(bookRequest.name, "hola");
    bookRequest.ISBN = 123;
    bookRequest.operation = 'P';
