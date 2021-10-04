@@ -16,11 +16,9 @@ int pos = 0;
 void assign(char operation, char *name, int ISBN){
 
    pos ++;
-
    strcpy(booksRequests[pos].name, name);
    booksRequests[pos].ISBN = ISBN;
    booksRequests[pos].operation = operation;
-   sprintf(namePS, "PS%d", numPS);
    strcpy(booksRequests[pos].secondpipe, namePS);
 
 }
@@ -34,14 +32,14 @@ void readFile(char *nameFile){
 
    fp = fopen(nameFile, "r");
    
+   printf("entre\n");
 
-   while (!feof(fp))  {
-      fscanf(fp, "%c,%s,%d\n", &operation, name, &ISBN);
-      numPS ++;
+   while (!feof(fp)) {
+      fscanf(fp, "%c %s %d\n", &operation, name, &ISBN);
+      // numPS ++;
+      printf("%c - %s - %d\n", operation, name, ISBN);
+      // assign(operation, name, ISBN);
 
-      printf(" %c, %s, %d, %d\n", operation, name, ISBN, numPS);
-      
-      assign(operation, name, ISBN);
    }
 }
 
@@ -117,6 +115,7 @@ int main (int argc, char *argv[]){
 
 
    readFile(argv[2]);
+   printf("%d\n", numPS);
    
    for(int i = 0; i < pos; i++){
       printf(" %c, %s, %d, %s\n", booksRequests[i].operation, booksRequests[i].name, booksRequests[i].ISBN, booksRequests[i].secondpipe);
