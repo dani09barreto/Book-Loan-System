@@ -8,8 +8,42 @@
 #include "book.h"
 
 char request [TAMMENSAJE];
-int numPS = 1;
+int numPS = 0;
 char namePS [TAMMENSAJE];
+book booksRequests [MAXBOOK];
+int pos = 0;
+
+void assign(char operation, char *name, int ISBN){
+
+   pos ++;
+
+   strcpy(booksRequests[pos].name, name);
+   booksRequests[pos].ISBN = ISBN;
+   booksRequests[pos].operation = operation;
+   sprintf(namePS, "PS%d", numPS);
+   strcpy(booksRequests[pos].secondpipe, namePS);
+
+}
+
+void readFile(char *nameFile){
+
+   FILE *fp;
+   char operation;
+   char name [MAXNAME];
+   int ISBN;
+
+   fp = fopen(nameFile, "r");
+   
+
+   while (!feof(fp))  {
+      fscanf(fp, "%c,%s,%d\n", &operation, name, &ISBN);
+      numPS ++;
+
+      printf(" %c, %s, %d, %d\n", operation, name, ISBN, numPS);
+      
+      assign(operation, name, ISBN);
+   }
+}
 
 void createpipe (char *namepipe, book bookRequest){
 
@@ -73,23 +107,30 @@ void createpipe (char *namepipe, book bookRequest){
 
 int main (int argc, char *argv[]){
 
+
   if (argc != 5){
     perror("Numero de argumentos invalidos\n");
     printf("ej: ./center –i file –p fileReceptor \n");
     exit (0);
   }
-   book bookRequest;
+   
 
+
+   readFile(argv[2]);
+   
+   for(int i = 0; i < pos; i++){
+      printf(" %c, %s, %d, %s\n", booksRequests[i].operation, booksRequests[i].name, booksRequests[i].ISBN, booksRequests[i].secondpipe);
+   }
+   /*for(int i = 0; i < pos; i++){
+      createpipe(argv[4], booksRequests[i]);
+   }
+   */
    //LLenado de la instancia del libro
    //se debe hacer esto cada vez que se quiera crear una nueva solicitud y aumentar numPS
    //ya que lleva el num de proceso ej. PS1 PS2 y asi
-   strcpy(bookRequest.name, "hola");
-   bookRequest.ISBN = 123;
-   bookRequest.operation = 'P';
-   sprintf(namePS, "PS%d", numPS);
-   strcpy(bookRequest.secondpipe, namePS);
+   
 
-   createpipe(argv[4], bookRequest);
+   
 
    exit(0);
 }

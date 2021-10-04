@@ -1,5 +1,5 @@
 
-#define MAXBOOK 10000
+#define MAXBOOK 100
 #define MAXNAME 50
 #define TAMMENSAJE 10
 
