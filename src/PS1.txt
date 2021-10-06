@@ -1,6 +1,0 @@
-P AfricanFolktales 5963
-P LoveChild 6829
-R LoveChild 6829
-D BlackNature 3655
-D Touch 4980
-P AmericanDreams 2841

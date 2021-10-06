@@ -34,7 +34,7 @@ void tokLine(char *line){
          booksRequests[pos].ISBN = atoi(token);
       }
    }
-   sprintf(namePS, "PS#%i", getpid());
+   sprintf(namePS, "debug/PS#%i", getpid());
    strcpy(booksRequests[pos].secondpipe, namePS);
    pos ++;
 }
@@ -107,8 +107,6 @@ void createRequest (char *namepipe, book bookRequest){
       exit(0);
    }
 
-   printf("\tEl proceso %s termina\n", namePS);
-
    if (strcmp(answer, "1") == 0){
       printf("\tSu peticion fue exitosa\n");
    }
@@ -122,7 +120,7 @@ int main (int argc, char *argv[]){
 
   if (argc != 5){
     perror("\tNumero de argumentos invalidos\n");
-    printf("\tej: ./center –i file –p pipeReceptor \n");
+    printf("\tej: ./debug/center –i file/PS.txt –p debug/pipeReceptor \n");
     exit (0);
   }
    
@@ -183,7 +181,7 @@ int main (int argc, char *argv[]){
                   printf("\tNombre: %s\n", bookRequest.name);
                   printf("\tISBN: %d\n", bookRequest.ISBN);
                   printf("\tPipe: %s\n", bookRequest.secondpipe);
-                  //createRequest(argv[4], bookRequest);
+                  createRequest(argv[4], bookRequest);
                   break;
                case 2:
                   printf("\n");
@@ -230,6 +228,6 @@ int main (int argc, char *argv[]){
       break;
    }
    
-
+   printf("\tEl proceso %s termina\n", namePS);
    exit(0);
 }
