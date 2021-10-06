@@ -8,8 +8,48 @@
 #include "book.h"
 
 char request [TAMMENSAJE];
-int numPS = 1;
+int numPS = 0;
 char namePS [TAMMENSAJE];
+book booksRequests [MAXBOOK];
+int pos = 0;
+
+void tokLine(char *line){
+
+   char *token;
+   int i = 0;
+
+   token = strtok(line, ",");
+   
+
+   while(token){
+      if(i == 0){
+         booksRequests[pos].operation  = token[0];
+      }
+      i++;
+      printf("%s\n", token);
+      token = strtok(NULL, ",");
+      if(i == 1){
+         strcpy(booksRequests[pos].name, token);
+      }
+      if(i == 2){
+         booksRequests[pos].ISBN = atoi(token);
+      }
+   }
+   pos ++;
+}
+
+void readFile(char *nameFile){
+
+   FILE *fd;
+   char line [MAXLINE];
+
+   fd = fopen(nameFile, "r");
+
+   while(fgets(line, sizeof(line), fd)){
+      tokLine(line);
+   } 
+
+}
 
 void createpipe (char *namepipe, book bookRequest){
 
@@ -73,23 +113,63 @@ void createpipe (char *namepipe, book bookRequest){
 
 int main (int argc, char *argv[]){
 
+
   if (argc != 5){
     perror("Numero de argumentos invalidos\n");
     printf("ej: ./center –i file –p fileReceptor \n");
     exit (0);
   }
-   book bookRequest;
+   
+   int opcion;
 
+   printf("    Welcome to BookTime\n");
+   printf("1. leer el archivo\n");
+   printf("2. digitar la informacion del libro\n");
+   printf("Escoja una opcion: ");
+   scanf("%d", &opcion);
+
+
+   
+   switch (opcion)
+   {
+   case 1:
+      readFile(argv[2]);
+      printf("se leyo del archivo %s\n", argv[2]);
+      for(int i = 0; i < pos; i++){
+         printf(" %c, %s, %d\n", booksRequests[i].operation, booksRequests[i].name, booksRequests[i].ISBN);
+      }
+          
+      for(int i = 0; i < pos; i++){
+         printf("se crea solicitud\n");
+         printf(" %c, %s, %d\n", booksRequests[i].operation, booksRequests[i].name, booksRequests[i].ISBN); 
+         createpipe(argv[4], booksRequests[i]);
+      }
+      break;
+         case 2: 
+         printf("digite la operacion valida");
+         break;
+   default:
+      break;
+   }
+   
+
+   
+   /*
+   for(int i = 0; i < pos; i++){
+      printf(" %c, %s, %d\n", booksRequests[i].operation, booksRequests[i].name, booksRequests[i].ISBN);
+   }
+   */
+   /*
+   for(int i = 0; i < pos; i++){
+      createpipe(argv[4], booksRequests[i]);
+   }
+   */
    //LLenado de la instancia del libro
    //se debe hacer esto cada vez que se quiera crear una nueva solicitud y aumentar numPS
    //ya que lleva el num de proceso ej. PS1 PS2 y asi
-   strcpy(bookRequest.name, "hola");
-   bookRequest.ISBN = 123;
-   bookRequest.operation = 'P';
-   sprintf(namePS, "PS%d", numPS);
-   strcpy(bookRequest.secondpipe, namePS);
+   
 
-   createpipe(argv[4], bookRequest);
+   
 
    exit(0);
 }
