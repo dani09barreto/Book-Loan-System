@@ -16,29 +16,24 @@ int tokDataRequest (char *line, int stoks){
    int i = 0;
    char *token;
    token = strtok(line, ",");
-   printf("pos data %i, posrequest %i\n", posData-1, posRequest);
+
    while (token){
       if (i == 0){
          dataBase[posData - 1].requests[posRequest].stock = atoi(token);
-         printf("%i\n", dataBase[posData - 1].requests[posRequest].stock);
       }
       i ++;
       token = strtok(NULL, ",-");
       if (i == 1){
          dataBase[posData - 1].requests[posRequest].operation = token[0];
-         printf("%c\n", dataBase[posData - 1].requests[posRequest].operation);
       }
       if (i == 2){
          dataBase[posData - 1].requests[posRequest].initialDate.day = atoi(token);
-         printf("%i\n", dataBase[posData - 1].requests[posRequest].initialDate.day);
       }
       if (i == 3){
          dataBase[posData - 1].requests[posRequest].initialDate.month = atoi(token);
-         printf("%i\n", dataBase[posData - 1].requests[posRequest].initialDate.month);
       }
       if (i == 4){
          dataBase[posData - 1].requests[posRequest].initialDate.year = atoi(token);
-         printf("%i\n", dataBase[posData - 1].requests[posRequest].initialDate.year);
       }
    }
    posRequest ++;
@@ -62,17 +57,14 @@ int tokDataBook (char *line){
 
       if (i == 0){
          strcpy(dataBase[posData].name, token);
-         printf("%s\n", dataBase[posData].name);
       }
       i ++;
       token = strtok(NULL, ",-");
       if (i == 1){
          dataBase[posData].ISBN = atoi(token);
-         printf("%i\n", dataBase[posData].ISBN);
       }      
       if (i == 2){
          dataBase[posData].stocks = atoi(token);
-         printf("%i\n", dataBase[posData].stocks);
       }     
    }
    posData ++;
@@ -166,42 +158,42 @@ int main (int argc, char *argv[]){
    mode_t fifo_mode = S_IRUSR | S_IWUSR;
   
    if (argc != 7){
-      perror("Numero de argumentos invalidos\n");
-      printf("ej: ./receptor –p nombrepipe –f filedatos –s filesalida\n");
+      perror("\tNumero de argumentos invalidos\n");
+      printf("\tej: ./receptor –p nombrepipe –f filedatos –s filesalida\n");
       exit (0);
    }
 
    readDataBase(argv[4]);
-   printf("Se leyo de la BD\n");
+   printf("\tSe leyo de la BD\n");
    for (int i = 0; i < posData; i ++){
-      printf ("%s %i %i\n", dataBase[i].name, dataBase[i].ISBN, dataBase[i].stocks);
+      printf ("\t%s %i %i\n", dataBase[i].name, dataBase[i].ISBN, dataBase[i].stocks);
       for(int j = 0; j < dataBase[i].stocks; j ++){
-         printf ("%i,%c,%i-%i-%i\n", dataBase[i].requests[j].stock, dataBase[i].requests[j].operation, dataBase[i].requests[j].initialDate.day, dataBase[i].requests[j].initialDate.month, dataBase[i].requests[j].initialDate.year);
+         printf ("\t%i,%c,%i-%i-%i\n", dataBase[i].requests[j].stock, dataBase[i].requests[j].operation, dataBase[i].requests[j].initialDate.day, dataBase[i].requests[j].initialDate.month, dataBase[i].requests[j].initialDate.year);
       }
    }
-   /*
-   printf("Se crea el pipe %s para recibir solicitud\n", argv[2]);
-   printf("---------------------\n");
+   
+   printf("\tSe crea el pipe %s para recibir solicitud\n", argv[2]);
+   printf("\t---------------------\n");
    unlink(argv[2]);
    if (mkfifo (argv[2], fifo_mode) == -1) {
-      perror("Receptor mkfifo");
+      perror("\tReceptor mkfifo");
       exit(1);
    }
    
-   printf("Se esta abriendo el pipe %s para recibir solicitud\n", argv[2]);
-   printf("---------------------\n");
+   printf("\tSe esta abriendo el pipe %s para recibir solicitud\n", argv[2]);
+   printf("\t---------------------\n");
    if ((fd = open(argv[2], O_RDONLY)) == -1){
-      perror("Error al abrir el pipe\n");
+      perror("\tError al abrir el pipe\n");
       exit (0);
    }
 
-   printf("Se abrio %s \n", argv[2]);
-   printf("---------------------\n");
-   printf("Se esta leyendo la solicitud que manda el PS\n"); 
+   printf("\tSe abrio %s \n", argv[2]);
+   printf("\t---------------------\n");
+   printf("\te esta leyendo la solicitud que manda el PS\n"); 
 
    bytes = read (fd, &bookRequest, sizeof(bookRequest));
    if (bytes == -1) {
-      perror("proceso lector:");
+      perror("\tproceso lector:");
       exit(1);
    }
 
@@ -210,8 +202,8 @@ int main (int argc, char *argv[]){
    
    do { 
       if ((fd1 = open(bookRequest.secondpipe, O_WRONLY)) == -1) {
-         perror("Receptor Abriendo el segundo pipe\n");
-         printf("Se volvera a intentar despues\n");
+         perror("\tReceptor Abriendo el segundo pipe\n");
+         printf("\tSe volvera a intentar despues\n");
          sleep(5);
       } else create = 1; 
    }  while (create == 0);
@@ -228,10 +220,10 @@ int main (int argc, char *argv[]){
       returnBook(&bookRequest.secondpipe, fd1);
       break;
    default:
-      printf("Accion no se puede realizar\n");
+      printf("\tAccion no se puede realizar\n");
       break;
    }
-   */
+   
    exit(0);
 }
 
