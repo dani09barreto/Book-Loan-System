@@ -7,6 +7,96 @@
 #include <string.h>
 #include "book.h"
 
+data dataBase [MAXBOOK];
+int posData = 0;
+int posRequest = 0;
+
+int tokDataRequest (char *line, int stoks){
+
+   int i = 0;
+   char *token;
+   token = strtok(line, ",");
+   printf("pos data %i, posrequest %i\n", posData-1, posRequest);
+   while (token){
+      if (i == 0){
+         dataBase[posData - 1].requests[posRequest].stock = atoi(token);
+         printf("%i\n", dataBase[posData - 1].requests[posRequest].stock);
+      }
+      i ++;
+      token = strtok(NULL, ",-");
+      if (i == 1){
+         dataBase[posData - 1].requests[posRequest].operation = token[0];
+         printf("%c\n", dataBase[posData - 1].requests[posRequest].operation);
+      }
+      if (i == 2){
+         dataBase[posData - 1].requests[posRequest].initialDate.day = atoi(token);
+         printf("%i\n", dataBase[posData - 1].requests[posRequest].initialDate.day);
+      }
+      if (i == 3){
+         dataBase[posData - 1].requests[posRequest].initialDate.month = atoi(token);
+         printf("%i\n", dataBase[posData - 1].requests[posRequest].initialDate.month);
+      }
+      if (i == 4){
+         dataBase[posData - 1].requests[posRequest].initialDate.year = atoi(token);
+         printf("%i\n", dataBase[posData - 1].requests[posRequest].initialDate.year);
+      }
+   }
+   posRequest ++;
+
+   if (posRequest == stoks){
+      posRequest = 0;
+      return 0;
+   }
+   else{
+      return 1;
+   }
+}
+
+int tokDataBook (char *line){
+
+   int i = 0;
+   char *token;
+   token = strtok(line, ",");
+
+   while (token){
+
+      if (i == 0){
+         strcpy(dataBase[posData].name, token);
+         printf("%s\n", dataBase[posData].name);
+      }
+      i ++;
+      token = strtok(NULL, ",-");
+      if (i == 1){
+         dataBase[posData].ISBN = atoi(token);
+         printf("%i\n", dataBase[posData].ISBN);
+      }      
+      if (i == 2){
+         dataBase[posData].stocks = atoi(token);
+         printf("%i\n", dataBase[posData].stocks);
+      }     
+   }
+   posData ++;
+   return 1;
+}
+
+void readDataBase (char *filedata){
+
+   FILE *fd;
+   char line [MAXLINE];
+   int goRequest = 0;
+   int stoks;
+   fd = fopen(filedata, "r");
+
+   while (fgets(line, sizeof(line), fd)){
+
+      if (goRequest == 0){
+         goRequest = tokDataBook(line);
+      }
+      else{
+         goRequest = tokDataRequest(line, dataBase[posData - 1].stocks);
+      }
+   }
+}
 
 void requestBook (char *fileSecondpipe, int fd){
    
@@ -81,6 +171,15 @@ int main (int argc, char *argv[]){
       exit (0);
    }
 
+   readDataBase(argv[4]);
+   printf("Se leyo de la BD\n");
+   for (int i = 0; i < posData; i ++){
+      printf ("%s %i %i\n", dataBase[i].name, dataBase[i].ISBN, dataBase[i].stocks);
+      for(int j = 0; j < dataBase[i].stocks; j ++){
+         printf ("%i,%c,%i-%i-%i\n", dataBase[i].requests[j].stock, dataBase[i].requests[j].operation, dataBase[i].requests[j].initialDate.day, dataBase[i].requests[j].initialDate.month, dataBase[i].requests[j].initialDate.year);
+      }
+   }
+   /*
    printf("Se crea el pipe %s para recibir solicitud\n", argv[2]);
    printf("---------------------\n");
    unlink(argv[2]);
@@ -132,7 +231,7 @@ int main (int argc, char *argv[]){
       printf("Accion no se puede realizar\n");
       break;
    }
-   
+   */
    exit(0);
 }
 
