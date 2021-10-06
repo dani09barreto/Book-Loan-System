@@ -13,34 +13,42 @@ char namePS [TAMMENSAJE];
 book booksRequests [MAXBOOK];
 int pos = 0;
 
-void assign(char operation, char *name, int ISBN){
+void tokLine(char *line){
 
+   char *token;
+   int i = 0;
+
+   token = strtok(line, ",");
+   
+
+   while(token){
+      if(i == 0){
+         booksRequests[pos].operation  = token[0];
+      }
+      i++;
+      printf("%s\n", token);
+      token = strtok(NULL, ",");
+      if(i == 1){
+         strcpy(booksRequests[pos].name, token);
+      }
+      if(i == 2){
+         booksRequests[pos].ISBN = atoi(token);
+      }
+   }
    pos ++;
-   strcpy(booksRequests[pos].name, name);
-   booksRequests[pos].ISBN = ISBN;
-   booksRequests[pos].operation = operation;
-   strcpy(booksRequests[pos].secondpipe, namePS);
-
 }
 
 void readFile(char *nameFile){
 
-   FILE *fp;
-   char operation;
-   char name [MAXNAME];
-   int ISBN;
+   FILE *fd;
+   char line [MAXLINE];
 
-   fp = fopen(nameFile, "r");
-   
-   printf("entre\n");
+   fd = fopen(nameFile, "r");
 
-   while (!feof(fp)) {
-      fscanf(fp, "%c %s %d\n", &operation, name, &ISBN);
-      // numPS ++;
-      printf("%c - %s - %d\n", operation, name, ISBN);
-      // assign(operation, name, ISBN);
+   while(fgets(line, sizeof(line), fd)){
+      tokLine(line);
+   } 
 
-   }
 }
 
 void createpipe (char *namepipe, book bookRequest){
@@ -112,15 +120,47 @@ int main (int argc, char *argv[]){
     exit (0);
   }
    
+   int opcion;
+
+   printf("    Welcome to BookTime\n");
+   printf("1. leer el archivo\n");
+   printf("2. digitar la informacion del libro\n");
+   printf("Escoja una opcion: ");
+   scanf("%d", &opcion);
 
 
-   readFile(argv[2]);
-   printf("%d\n", numPS);
    
-   for(int i = 0; i < pos; i++){
-      printf(" %c, %s, %d, %s\n", booksRequests[i].operation, booksRequests[i].name, booksRequests[i].ISBN, booksRequests[i].secondpipe);
+   switch (opcion)
+   {
+   case 1:
+      readFile(argv[2]);
+      printf("se leyo del archivo %s\n", argv[2]);
+      for(int i = 0; i < pos; i++){
+         printf(" %c, %s, %d\n", booksRequests[i].operation, booksRequests[i].name, booksRequests[i].ISBN);
+      }
+          
+      for(int i = 0; i < pos; i++){
+         printf("se crea solicitud\n");
+         printf(" %c, %s, %d\n", booksRequests[i].operation, booksRequests[i].name, booksRequests[i].ISBN); 
+         createpipe(argv[4], booksRequests[i]);
+      }
+      break;
+         case 2: 
+         printf("digite la operacion valida");
+         break;
+   default:
+      break;
    }
-   /*for(int i = 0; i < pos; i++){
+   
+
+   
+   /*
+   for(int i = 0; i < pos; i++){
+      printf(" %c, %s, %d\n", booksRequests[i].operation, booksRequests[i].name, booksRequests[i].ISBN);
+   }
+   */
+   /*
+   for(int i = 0; i < pos; i++){
       createpipe(argv[4], booksRequests[i]);
    }
    */
