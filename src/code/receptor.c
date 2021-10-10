@@ -5,6 +5,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <string.h>
+#include <time.h>
 #include "book.h"
 
 data dataBase [MAXBOOK];
@@ -94,14 +95,28 @@ void readDataBase (char *filedata){
    }
 }
 
-void requestBook (char *fileSecondpipe, int fd){
+void sendAnswer(int bit, int fd){
+   if (bit == 1){
+      write(fd, "1", 10); 
+   }
+   if (bit == 0){
+      write(fd, "0", 10); 
+   }
+}
+void requestBook (book *bookRequest, int fd){
    
    int make = 0;
-   printf("\tSe abre %s para enviar la respuesta a la solicitud\n", fileSecondpipe);
+   int count = 0;
+   int bit = 0;
+   time_t t = time(NULL);
+   struct tm tm = *localtime(&t);
+
+
+   printf("\tSe abre %s para enviar la respuesta a la solicitud\n", bookRequest->secondpipe);
    printf("\t---------------------\n");
    
    do{
-      if ((fd = open (fileSecondpipe, O_WRONLY)) == -1){
+      if ((fd = open (bookRequest->secondpipe, O_WRONLY)) == -1){
          perror("\tReceptor abriendo el pipe respuesta\n");
          perror("\tSe intentara mas tarde\n");
          sleep(5);
@@ -110,19 +125,49 @@ void requestBook (char *fileSecondpipe, int fd){
          make = 1;
       }
    }while(make == 0);
-   
-   printf("\tProceso receptor envia respuesta a pipe del proceso solicitud\n");
-   write(fd, "1", 10);
+
+
+   for(int i = 0; i < posData; i++){
+
+      if(dataBase[i].ISBN == bookRequest->ISBN){
+
+         for(int j = 0; j < dataBase[i].stocks; j++){
+
+            if(dataBase[i].requests[j].operation == 'D'){
+
+               dataBase[i].requests[j].operation = 'P';
+               dataBase[i].requests[j].initialDate.day = tm.tm_mday;
+               dataBase[i].requests[j].initialDate.month = (tm.tm_mon + 1);
+               dataBase[i].requests[j].initialDate.year = (tm.tm_year + 1900);
+               bit = 1;
+               printf("\tSe escribe la respuesta al PS solicitud\n");
+               sendAnswer(bit, fd);
+               return;                
+            }
+         }
+         if (bit == 0){
+            printf("\t Se escribe la respuesta al PS solicitud\n");
+            sendAnswer(bit, fd);
+            return;
+         }
+      }
+      count++;
+   }
+   if(posData == count){
+      printf("\t Se escribe la respuesta al PS solicitud\n");
+      sendAnswer(bit, fd);
+   }
+
 }
 
-void returnBook (char *fileSecondpipe, int fd){
+void returnBook (book *bookRequest, int fd){
 
    int make = 0;
 
-   printf("\tSe abre %s para enviar la respuesta a la solicitud\n", fileSecondpipe);
+   printf("\tSe abre %s para enviar la respuesta a la solicitud\n", bookRequest->secondpipe);
    printf("\t---------------------\n");
    do{
-      if ((fd = open (fileSecondpipe, O_WRONLY)) == -1){
+      if ((fd = open (bookRequest->secondpipe, O_WRONLY)) == -1){
          perror("\tReceptor abriendo el pipe respuesta\n");
          perror("\tSe intentara mas tarde\n");
          sleep(5);
@@ -135,14 +180,14 @@ void returnBook (char *fileSecondpipe, int fd){
    write(fd, "1", 10);
 }
 
-void renovateBook (char *fileSecondpipe, int fd){
+void renovateBook (book *bookRequest, int fd){
     
    int make = 0;
 
-   printf("\tSe abre %s para enviar la respuesta a la solicitud\n", fileSecondpipe);
+   printf("\tSe abre %s para enviar la respuesta a la solicitud\n", bookRequest->secondpipe);
    printf("\t---------------------\n");
    do{
-      if ((fd = open (fileSecondpipe, O_WRONLY)) == -1){
+      if ((fd = open (bookRequest->secondpipe, O_WRONLY)) == -1){
          perror("\tReceptor abriendo el pipe respuesta\n");
          perror("\tSe intentara mas tarde\n");
          sleep(5);
@@ -233,13 +278,13 @@ int main (int argc, char *argv[]){
       switch (bookRequest.operation){
 
       case 'P':
-         requestBook(&bookRequest.secondpipe, fd1);
+         requestBook(&bookRequest, fd1);
          break;
       case 'D':
-         returnBook(&bookRequest.secondpipe, fd1);
+         returnBook(&bookRequest, fd1);
          break;
       case 'R':
-         returnBook(&bookRequest.secondpipe, fd1);
+         returnBook(&bookRequest, fd1);
          break;
       default:
          printf("\tAccion no se puede realizar\n");
@@ -248,6 +293,13 @@ int main (int argc, char *argv[]){
 
    }while(bytes > 0);
    printf("\t------------------------\n");
+   printf("\t----------------\n");
+   for (int i = 0; i < posData; i ++){
+      printf ("\t%s %i %i\n", dataBase[i].name, dataBase[i].ISBN, dataBase[i].stocks);
+      for(int j = 0; j < dataBase[i].stocks; j ++){
+         printf ("\t%i,%c,%i-%i-%i\n", dataBase[i].requests[j].stock, dataBase[i].requests[j].operation, dataBase[i].requests[j].initialDate.day, dataBase[i].requests[j].initialDate.month, dataBase[i].requests[j].initialDate.year);
+      }
+   }
    printf("\tel proceso termino\n");
    exit(0);
 }
