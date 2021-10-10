@@ -217,6 +217,10 @@ void returnBook (book *bookRequest, int fd){
 void renovateBook (book *bookRequest, int fd){
     
    int make = 0;
+   int count = 0;
+   int bit = 0;
+   time_t t = time(NULL);
+   struct tm tm = *localtime(&t);
 
    printf("\tSe abre %s para enviar la respuesta a la solicitud\n", bookRequest->secondpipe);
    printf("\t---------------------\n");
@@ -230,21 +234,84 @@ void renovateBook (book *bookRequest, int fd){
          make = 1;
       }
    }while(make == 0);
-   printf("\tProceso receptor envia respuesta a pipe del proceso solicitud\n");
-   write(fd, "1", 10);
+
+   for(int i = 0; i < posData; i++){
+
+      if(dataBase[i].ISBN == bookRequest->ISBN){
+
+         for(int j = 0; j < dataBase[i].stocks; j++){
+
+            if(dataBase[i].requests[j].operation == 'P' && dataBase[i].requests[j].initialDate.day == dateDefault.day){
+               printf("si hay\n");
+
+               dataBase[i].requests[j].operation = 'R';
+               if ((dataBase[i].requests[j].initialDate.day + 10)%30 != dataBase[i].requests[j].initialDate.day + 10){
+
+                  dataBase[i].requests[j].initialDate.day += 10;
+                  dataBase[i].requests[j].initialDate.day %= 30;
+
+                  if ((dataBase[i].requests[j].initialDate.month + 1)%12 != dataBase[i].requests[j].initialDate.month + 1){
+                     dataBase[i].requests[j].initialDate.month = 1;
+                     dataBase[i].requests[j].initialDate.year ++;
+                  }
+                  else{
+                     dataBase[i].requests[j].initialDate.month ++;
+                  }
+               }
+               else{
+                  dataBase[i].requests[j].initialDate.day += 10;
+               }
+               bit = 1;
+               printf("\tSe escribe la respuesta al PS solicitud\n");
+               sendAnswer(bit, fd);
+               return;                
+            }
+         }
+         if (bit == 0){
+            printf("\t Se escribe la respuesta al PS solicitud\n");
+            sendAnswer(bit, fd);
+            return;
+         }
+      }
+      count++;
+   }
+   if(posData == count){
+      printf("\t Se escribe la respuesta al PS solicitud\n");
+      sendAnswer(bit, fd);
+   }
+
+}
+
+void makeFile (char *namefile){
+   
+   FILE *fp = fopen(namefile, "w");
+   if (fp == NULL){
+      perror("\tEl Archivo no pudo ser abierto\n");
+      exit (0);
+   }
+
+   for (int i = 0; i < posData; i ++){
+      fprintf(fp, "%s,%d,%d\n", dataBase[i].name, dataBase[i].ISBN, dataBase[i].stocks);
+      for (int j = 0; j < dataBase[i].stocks; j ++){
+         fprintf(fp, "%d,%c,%d-%d-%d\n", dataBase[i].requests[j].stock, dataBase[i].requests[j].operation,dataBase[i].requests[j].initialDate.day, dataBase[i].requests[j].initialDate.month, dataBase[i].requests[j].initialDate.year);
+      }
+   }
+   fflush(fp);
+   fclose(fp);
+   printf("\t Se actualizo la base de datos\n");
 }
 
 int main (int argc, char *argv[]){
-
-   int  fd, fd1, bytes,create = 0;
-   book bookRequest;
-   mode_t fifo_mode = S_IRUSR | S_IWUSR;
   
    if (argc != 7){
       perror("\tNumero de argumentos invalidos\n");
       printf("\tej: ./debug/receptor –p debug/pipeReceptor –f files/filedatos –s filesalida\n");
       exit (0);
    }
+   
+   int  fd, fd1, bytes,create = 0;
+   book bookRequest;
+   mode_t fifo_mode = S_IRUSR | S_IWUSR;
 
    readDataBase(argv[4]);
    printf("\tDate default: %d-%d-%d", dateDefault.day, dateDefault.month, dateDefault.year);
@@ -318,7 +385,7 @@ int main (int argc, char *argv[]){
          returnBook(&bookRequest, fd1);
          break;
       case 'R':
-         returnBook(&bookRequest, fd1);
+         renovateBook(&bookRequest, fd1);
          break;
       default:
          printf("\tAccion no se puede realizar\n");
@@ -334,7 +401,9 @@ int main (int argc, char *argv[]){
          printf ("\t%i,%c,%i-%i-%i\n", dataBase[i].requests[j].stock, dataBase[i].requests[j].operation, dataBase[i].requests[j].initialDate.day, dataBase[i].requests[j].initialDate.month, dataBase[i].requests[j].initialDate.year);
       }
    }
+   makeFile(argv[6]);
    printf("\tel proceso termino\n");
+   close(argv[2]);
    exit(0);
 }
 
