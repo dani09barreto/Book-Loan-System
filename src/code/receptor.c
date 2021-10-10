@@ -103,6 +103,7 @@ void sendAnswer(int bit, int fd){
       write(fd, "0", 10); 
    }
 }
+
 void requestBook (book *bookRequest, int fd){
    
    int make = 0;
@@ -163,6 +164,10 @@ void requestBook (book *bookRequest, int fd){
 void returnBook (book *bookRequest, int fd){
 
    int make = 0;
+   int count = 0;
+   int bit = 0;
+   time_t t = time(NULL);
+   struct tm tm = *localtime(&t);
 
    printf("\tSe abre %s para enviar la respuesta a la solicitud\n", bookRequest->secondpipe);
    printf("\t---------------------\n");
@@ -176,8 +181,37 @@ void returnBook (book *bookRequest, int fd){
          make = 1;
       }
    }while(make == 0);
-   printf("\tProceso receptor envia respuesta a pipe del proceso solicitud\n");
-   write(fd, "1", 10);
+
+   for(int i = 0; i < posData; i++){
+
+      if(dataBase[i].ISBN == bookRequest->ISBN){
+
+         for(int j = 0; j < dataBase[i].stocks; j++){
+
+            if(dataBase[i].requests[j].operation == 'P'){
+
+               dataBase[i].requests[j].operation = 'D';
+               dataBase[i].requests[j].initialDate.day = tm.tm_mday;
+               dataBase[i].requests[j].initialDate.month = (tm.tm_mon + 1);
+               dataBase[i].requests[j].initialDate.year = (tm.tm_year + 1900);
+               bit = 1;
+               printf("\tSe escribe la respuesta al PS solicitud\n");
+               sendAnswer(bit, fd);
+               return;                
+            }
+         }
+         if (bit == 0){
+            printf("\t Se escribe la respuesta al PS solicitud\n");
+            sendAnswer(bit, fd);
+            return;
+         }
+      }
+      count++;
+   }
+   if(posData == count){
+      printf("\t Se escribe la respuesta al PS solicitud\n");
+      sendAnswer(bit, fd);
+   }
 }
 
 void renovateBook (book *bookRequest, int fd){
