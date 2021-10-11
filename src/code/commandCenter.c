@@ -13,6 +13,15 @@ char namePS [TAMMENSAJE];
 book booksRequests [MAXBOOK];
 int pos = 0;
 
+
+/*
+Name : tokLine
+Parameters : char* line
+Function : Esta funcion tokeniza la linea que recibe por parametro y la almacena en un arreglo de
+libro. Almacena los datos de la informacion del libro que recibe:
+Return value : void
+*/
+
 void tokLine(char *line){
 
    char *token;
@@ -38,6 +47,14 @@ void tokLine(char *line){
    pos ++;
 }
 
+/*
+Name : readFile
+Parameters : char* nameFile
+Function : Esta funcion lee el archivo de las solicitudes y cada linea que lee la envia a la funcion
+tokLine para poder guardar esa informacion en bookRequests.
+Return value : void
+*/
+
 void readFile(char *nameFile){
 
    FILE *fd;
@@ -51,7 +68,17 @@ void readFile(char *nameFile){
 
 }
 
+
+/*
+Name : createRequest
+Parameters : char* namepipe, book bookRequest
+Function : Esta funcioln crea las solicitudes en el pipe y espera por que el receptor analice la 
+oeticion y le informe si es posible realizar la solicitud cargada.
+Return value : void
+*/
+
 void createRequest (char *namepipe, book bookRequest, int fd){
+
 
 
    int fd1, pid, create = 0;

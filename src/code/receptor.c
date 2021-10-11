@@ -8,10 +8,21 @@
 #include <time.h>
 #include "book.h"
 
-data dataBase [MAXBOOK];
-int posData = 0;
-int posRequest = 0;
-date dateDefault;
+data dataBase [MAXBOOK]; // Esta Variable dataBase es usada para guardar los nombre de los libros y sus datos de la BD:
+int posData = 0; // Representa la ubicacion en el arreglo dataBase de los libros.
+int posRequest = 0; // Representa la ubicacion de las solicitudes por cada libro.
+date dateDefault; // Esta variable se define cada vez que se lee la base de datos para conocer la fecha de defecto
+
+/*
+Name : tokDataRequest
+Parameters: char *line, int stoks
+Function: Esta funcion es usada para guardar los libros por medio de la tokenizacion pues recibimos
+ una linea y la cantidad de libros que existen y con ello guardamos esos datos (Cantidad, Solicitud,fecha)
+  en el arreglo dataBase.
+  Return value: int - Este retornara un 1 o un 0 dependiendo, si ya ha leido todas las solicitudes
+  que existen por cada libro retorna un 0 de manera que la funcion readDataBase lea los datos del 
+  siguiente libro y en caso contrario vuelva a llamar esta funcion para leer la siguiente solicitud.
+*/
 
 int tokDataRequest (char *line, int stoks){
 
@@ -52,6 +63,17 @@ int tokDataRequest (char *line, int stoks){
    }
 }
 
+/*
+Name : tokDataBook
+Parameters :  char *line
+Function: La funcion tokDataBook la usamos para guardar la informacion de cada libro en el arreglo 
+dataBase usando la variable posData ademas de guardar los datos como el nombre, el isbn y la cantidad
+de libros existentes.
+Return value: int - Esta funcion retorna un 1 debido a que la informacion del libro solo esta
+en una linea del archivo. Ademas ese retorno le informa a la funcion readDataBase que debe leer las
+solicitudes.
+*/
+
 int tokDataBook (char *line){
 
    int i = 0;
@@ -76,6 +98,15 @@ int tokDataBook (char *line){
    return 1;
 }
 
+/*
+Name : readDataBase
+Parameters: char *filedata
+Function : Esta funcion administra la lectura del archivo para poder determinar que informacion se 
+esta leyendo por medio de la variable goRequest la cual nos indica en que funcion debemos estar leyendo 
+ya sea la informacion del libro o las solicitudes del mismo.
+Return value: void
+*/
+
 void readDataBase (char *filedata){
 
    FILE *fd;
@@ -95,6 +126,14 @@ void readDataBase (char *filedata){
    }
 }
 
+/*
+Name : sendAnswer
+Parameters : int bit, int fd
+Function: Esta funcion reescribe el archivo, dependiendo el bit que recibe que le indica si una 
+solicitud es exitosa o no.
+Return value : void
+*/
+
 void sendAnswer(int bit, int fd){
    if (bit == 1){
       if (write(fd, "1", 10) == -1){
@@ -111,6 +150,16 @@ void sendAnswer(int bit, int fd){
       }
    }
 }
+
+/*
+Name : requestBook
+Parameters : book* bookRequest, int fd
+Function : Esta funcion se encarga de realizar las peticiones de los libros ya que recibe la 
+informacion de un libro por medio de la estructura de libro, y revisa que sea posible 
+realizar una peticion, es decir , busca que haya algun libro devuelto y en dicho caso cambia su valor a
+'P' de pedido y modifica su fecha por la actual.
+Return value : void
+*/
 
 void requestBook (book *bookRequest, int fd){
    
@@ -169,6 +218,15 @@ void requestBook (book *bookRequest, int fd){
 
 }
 
+/*
+Name : returnBook
+Parameters : book* bookRequest, int fd
+Function : Realiza la solicitud de devolver un libro, por lo que se busca un ejemplar el cual 
+posea un estado de 'P' (pedido) para asi actualizar su estado y establecerlo como 'D'(devuelto) ademas 
+de actualizar la fecha.
+Return value : void
+*/
+
 void returnBook (book *bookRequest, int fd){
 
    int make = 0;
@@ -221,6 +279,14 @@ void returnBook (book *bookRequest, int fd){
       sendAnswer(bit, fd);
    }
 }
+
+/*
+Name : renovateBook
+Parameters : book* bookRequest, int fd
+Function : Realizamos la renovacion de una libro pedido anteriormente por lo que aumentamos
+10 dias su reserva y analizamos si esos 10 dias afectan el mes o el año.
+Return value : void
+*/
 
 void renovateBook (book *bookRequest, int fd){
     
@@ -290,6 +356,14 @@ void renovateBook (book *bookRequest, int fd){
 
 }
 
+/*
+Name : makeFile
+Parameters : char* namefile
+Function : La funcion se encarga de escribir el archivo de salida con la informacion de la base de
+datos actualizada usando el nombre del archivo que le llega por parametro.
+Return value : void
+*/
+
 void makeFile (char *namefile){
    
    FILE *fp = fopen(namefile, "w");
@@ -308,6 +382,7 @@ void makeFile (char *namefile){
    fclose(fp);
    printf("\t Se actualizo la base de datos\n");
 }
+
 
 int main (int argc, char *argv[]){
   
