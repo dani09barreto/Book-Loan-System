@@ -71,7 +71,7 @@ void readFile(char *nameFile){
 
 /*
 Name : createRequest
-Parameters : char* namepipe, book bookRequest
+Parameters : char* namepipe, book bookRequest, int fd
 Function : Esta funcioln crea las solicitudes en el pipe y espera por que el receptor analice la 
 oeticion y le informe si es posible realizar la solicitud cargada.
 Return value : void
