@@ -51,22 +51,11 @@ void readFile(char *nameFile){
 
 }
 
-void createRequest (char *namepipe, book bookRequest){
+void createRequest (char *namepipe, book bookRequest, int fd){
 
 
-   int  fd, pid, create = 0;
-
-   printf("\tSe abre el %s para enviar proceso a realizar\n", namepipe);
-   printf("\t---------------------\n");
-
-   do { 
-      if ((fd = open(namepipe, O_WRONLY))== -1) {
-         perror("\t[!] Error en la lectura del pipe\n");
-         printf("\tSe volvera a intentar despues\n");
-	      sleep(5);        
-      } else create = 1;
-   } while (create == 0);
-
+   int fd1, pid, create = 0;
+   printf("\t---------------------------\n");
    printf("\tSe escribe %s\n", namepipe);
    printf("\tSe escribe\n");
    printf("\tSolicitud: %c\n", bookRequest.operation);
@@ -86,13 +75,13 @@ void createRequest (char *namepipe, book bookRequest){
 
    create = 0;
    do { 
-      if ((fd = open(namePS, O_RDONLY)) == -1) {
+      if ((fd1 = open(namePS, O_RDONLY)) == -1) {
          perror("\tCommand Center Abriendo el segundo pipe. Se volvera a intentar\n");
          sleep(5);
       } else create = 1; 
    } while (create == 0);
     
-   if (read(fd, answer, 10) == -1){
+   if (read(fd1, answer, 10) == -1){
       perror ("\t[!] No se pudo leer la respuesta del Proceso receptor");
       exit(0);
    }
@@ -103,7 +92,7 @@ void createRequest (char *namepipe, book bookRequest){
    else{
       printf("\tSu peticion no fue exitosa\n");
    }
-   close (namePS);
+   close (fd1);
 }
 
 int main (int argc, char *argv[]){
@@ -117,6 +106,7 @@ int main (int argc, char *argv[]){
    
    int option;
    int optionMenu;
+   int fd, create = 0;
    book bookRequest;
    mode_t fifo_mode = S_IRUSR | S_IWUSR;
    sprintf(namePS, "debug/PS#%i", getpid());
@@ -136,6 +126,16 @@ int main (int argc, char *argv[]){
       perror("\t[!] Request mkfifo");
       exit(1);
    }
+   printf("\tSe abre el %s para enviar proceso a realizar\n", argv[4]);
+   printf("\t---------------------\n");
+
+   do { 
+      if ((fd = open(argv[4], O_WRONLY))== -1) {
+         perror("\t[!] Error en la lectura del pipe\n");
+         printf("\tSe volvera a intentar despues\n");
+	      sleep(5);        
+      } else create = 1;
+   } while (create == 0);
 
    switch (option){
 
@@ -153,7 +153,7 @@ int main (int argc, char *argv[]){
          printf("\tNombre: %s\n", booksRequests[i].name);
          printf("\tISBN: %d\n", booksRequests[i].ISBN);
          printf("\tPipe: %s\n", booksRequests[i].secondpipe);
-         createRequest(argv[4], booksRequests[i]);
+         createRequest(argv[4], booksRequests[i], fd);
       }
       break;
          case 2: 
@@ -172,9 +172,10 @@ int main (int argc, char *argv[]){
                case 1:
                   printf("\n");
                   printf("\tInserte el nombre del libro\n");
-                  scanf("%s", bookRequest.name);
+                  fflush(stdin);
+                  scanf("%s",&bookRequest.name);
                   printf("\tInserte el ISBN del libro\n");
-                  scanf("\t%d", &bookRequest.ISBN);
+                  scanf("%d", &bookRequest.ISBN);
                   bookRequest.operation = 'P';
                   strcpy(bookRequest.secondpipe, namePS);
                   printf("\t---------------------\n");
@@ -183,12 +184,13 @@ int main (int argc, char *argv[]){
                   printf("\tNombre: %s\n", bookRequest.name);
                   printf("\tISBN: %d\n", bookRequest.ISBN);
                   printf("\tPipe: %s\n", bookRequest.secondpipe);
-                  createRequest(argv[4], bookRequest);
+                  createRequest(argv[4], bookRequest, fd);
                   break;
                case 2:
                   printf("\n");
                   printf("\tInserte el nombre del libro\n");
-                  scanf("%s", bookRequest.name);
+                  fflush(stdin);
+                  scanf("%s",&bookRequest.name);
                   printf("\tInserte el ISBN del libro\n");
                   scanf("%d", &bookRequest.ISBN);
                   bookRequest.operation = 'D';
@@ -199,14 +201,15 @@ int main (int argc, char *argv[]){
                   printf("\tNombre: %s\n", bookRequest.name);
                   printf("\tISBN: %d\n", bookRequest.ISBN);
                   printf("\tPipe: %s\n", bookRequest.secondpipe);
-                  createRequest(argv[4], bookRequest);
+                  createRequest(argv[4], bookRequest, fd);
                   break;
                case 3:
                   printf("\n");
                   printf("\tInserte el nombre del libro\n");
-                  scanf("%s", bookRequest.name);
+                  fflush(stdin);
+                  scanf("%s",&bookRequest.name);
                   printf("\tInserte el ISBN del libro\n");
-                  scanf("%d", bookRequest.ISBN);
+                  scanf("%d", &bookRequest.ISBN);
                   bookRequest.operation = 'R';
                   strcpy(bookRequest.secondpipe, namePS);
                   printf("\t---------------------\n");
@@ -215,7 +218,7 @@ int main (int argc, char *argv[]){
                   printf("\tNombre: %s\n", bookRequest.name);
                   printf("\tISBN: %d\n", bookRequest.ISBN);
                   printf("\tPipe: %s\n", bookRequest.secondpipe);
-                  createRequest(argv[4], bookRequest);
+                  createRequest(argv[4], bookRequest, fd);
                   break;
                default:
                   printf("\n");
@@ -227,7 +230,7 @@ int main (int argc, char *argv[]){
    default:
       break;
    }
-   close(argv[4]);
+   close(fd);
    printf("\tEl proceso %s termina\n", namePS);
    exit(0);
 }

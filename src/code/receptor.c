@@ -97,10 +97,18 @@ void readDataBase (char *filedata){
 
 void sendAnswer(int bit, int fd){
    if (bit == 1){
-      write(fd, "1", 10); 
+      if (write(fd, "1", 10) == -1){
+         perror("\t");
+         printf("\tError en escribir respuesta\n");
+         exit (0);
+      } 
    }
    if (bit == 0){
-      write(fd, "0", 10); 
+      if (write(fd, "0", 10) == -1){
+         perror("\t");
+         printf("\tError en escribir respuesta\n");
+         exit (0);
+      }
    }
 }
 
@@ -276,7 +284,7 @@ void renovateBook (book *bookRequest, int fd){
       count++;
    }
    if(posData == count){
-      printf("\t Se escribe la respuesta al PS solicitud\n");
+      printf("\tSe escribe la respuesta al PS solicitud\n");
       sendAnswer(bit, fd);
    }
 
@@ -308,7 +316,7 @@ int main (int argc, char *argv[]){
       printf("\tej: ./debug/receptor –p debug/pipeReceptor –f files/filedatos –s filesalida\n");
       exit (0);
    }
-   
+
    int  fd, fd1, bytes,create = 0;
    book bookRequest;
    mode_t fifo_mode = S_IRUSR | S_IWUSR;
@@ -403,7 +411,7 @@ int main (int argc, char *argv[]){
    }
    makeFile(argv[6]);
    printf("\tel proceso termino\n");
-   close(argv[2]);
+   close(fd);
    exit(0);
 }
 
