@@ -319,7 +319,7 @@ void renovateBook (book *bookRequest, int fd){
                printf("si hay\n");
 
                dataBase[i].requests[j].operation = 'R';
-               if ((dataBase[i].requests[j].initialDate.day + 7)%30 != dataBase[i].requests[j].initialDate.day + 10){
+               if ((dataBase[i].requests[j].initialDate.day + 7)%30 != dataBase[i].requests[j].initialDate.day + 7){
 
                   dataBase[i].requests[j].initialDate.day += 7;
                   dataBase[i].requests[j].initialDate.day %= 30;
