@@ -316,7 +316,6 @@ void renovateBook (book *bookRequest, int fd){
          for(int j = 0; j < dataBase[i].stocks; j++){
 
             if(dataBase[i].requests[j].operation == 'P' && dataBase[i].requests[j].initialDate.day == dateDefault.day){
-               printf("si hay\n");
 
                dataBase[i].requests[j].operation = 'R';
                if ((dataBase[i].requests[j].initialDate.day + 7)%30 != dataBase[i].requests[j].initialDate.day + 7){
@@ -333,7 +332,7 @@ void renovateBook (book *bookRequest, int fd){
                   }
                }
                else{
-                  dataBase[i].requests[j].initialDate.day += 10;
+                  dataBase[i].requests[j].initialDate.day += 7;
                }
                bit = 1;
                printf("\tSe escribe la respuesta al PS solicitud\n");
@@ -397,7 +396,6 @@ int main (int argc, char *argv[]){
    mode_t fifo_mode = S_IRUSR | S_IWUSR;
 
    readDataBase(argv[4]);
-   printf("\tDate default: %d-%d-%d", dateDefault.day, dateDefault.month, dateDefault.year);
    printf("\n");
    printf("\tSe leyo de la BD\n");
    printf("\t----------------\n");
