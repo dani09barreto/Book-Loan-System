@@ -318,6 +318,10 @@ void renovateBook (book *bookRequest, int fd){
             if(dataBase[i].requests[j].operation == 'P' && dataBase[i].requests[j].initialDate.day == dateDefault.day){
 
                dataBase[i].requests[j].operation = 'R';
+               dataBase[i].requests[j].initialDate.day = tm.tm_mday;
+               dataBase[i].requests[j].initialDate.month = (tm.tm_mon + 1);
+               dataBase[i].requests[j].initialDate.year = (tm.tm_year + 1900);
+
                if ((dataBase[i].requests[j].initialDate.day + 7)%30 != dataBase[i].requests[j].initialDate.day + 7){
 
                   dataBase[i].requests[j].initialDate.day += 7;

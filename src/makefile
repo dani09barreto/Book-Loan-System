@@ -1,13 +1,13 @@
-all: debug/center debug/receptor
+all: debug/receptor debug/center 
 
-debug/receptor: code/receptor.o code/book.h
-	gcc -o debug/receptor code/receptor.o
+debug/receptor: debug/receptor.o code/book.h
+	gcc -o debug/receptor debug/receptor.o
 
-code/receptor.o: code/receptor.c code/book.h
+debug/receptor.o: code/receptor.c code/book.h
 	gcc -c code/receptor.c
 
-debug/center: code/commandCenter.o code/book.h
-	gcc -o debug/center code/commandCenter.o
+debug/center: debug/commandCenter.o code/book.h
+	gcc -o debug/center debug/commandCenter.o
 
-code/commandCenter.o: code/commandCenter.c code/book.h
+debug/commandCenter.o: code/commandCenter.c code/book.h
 	gcc -c code/commandCenter.c
