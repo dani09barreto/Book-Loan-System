@@ -127,7 +127,7 @@ int main (int argc, char *argv[]){
 
   if (argc != 5){
     perror("\tNumero de argumentos invalidos\n");
-    printf("\tej: ./debug/center –i file/PS.txt –p debug/pipeReceptor \n");
+    printf("\tej: ./debug/center –i files/PS.txt –p debug/pipeReceptor \n");
     exit (0);
   }
    
