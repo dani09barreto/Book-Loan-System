@@ -446,6 +446,7 @@ int main (int argc, char *argv[]){
          perror("\tproceso lector:");
          exit(1);
       }
+      sleep (3);
       printf("\t---------------------------\n");
       printf("\tSe lee:\n");
       printf("\tSolicitud: %c\n", bookRequest.operation);

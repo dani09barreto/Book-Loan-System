@@ -96,7 +96,7 @@ void createRequest (char *namepipe, book bookRequest, int fd){
       printf("\tNo se pudo enviar la solicitud\n");
       exit(0);
    }
-
+   sleep (3);
    printf("\tSe abre %s para leer la respuesta del receptor\n", namePS);
    printf("\t---------------------\n");
 

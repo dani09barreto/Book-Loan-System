@@ -1,0 +1,4 @@
+D,American Dreams,2841
+D,Immigrant Women,2610
+R,Touch,4980
+R,Love Child,6829
