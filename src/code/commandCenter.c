@@ -136,7 +136,6 @@ int main (int argc, char *argv[]){
    int fd, create = 0;
    book bookRequest;
    mode_t fifo_mode = S_IRUSR | S_IWUSR;
-   sprintf(namePS, "debug/PS#%i", getpid());
 
    printf("\n");
    printf("\t___Welcome to BookTime___\n");
@@ -147,12 +146,13 @@ int main (int argc, char *argv[]){
 
    printf("\tSe crea el pipe %s para recibir la respuesta del receptor\n", namePS);
    printf("\t---------------------\n");
-
+   
    unlink(namePS); 
    if (mkfifo (namePS, fifo_mode) == -1) {
       perror("\t[!] Request mkfifo");
       exit(1);
    }
+
    printf("\tSe abre el %s para enviar proceso a realizar\n", argv[4]);
    printf("\t---------------------\n");
 

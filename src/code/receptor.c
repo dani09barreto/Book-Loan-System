@@ -6,12 +6,62 @@
 #include <unistd.h>
 #include <string.h>
 #include <time.h>
+#include <signal.h>
+#include <pthread.h>
+#include <semaphore.h>
 #include "book.h"
+#define TAMBUFF 10
 
 data dataBase [MAXBOOK]; // Esta Variable dataBase es usada para guardar los nombre de los libros y sus datos de la BD:
 int posData = 0; // Representa la ubicacion en el arreglo dataBase de los libros.
 int posRequest = 0; // Representa la ubicacion de las solicitudes por cada libro.
 date dateDefault; // Esta variable se define cada vez que se lee la base de datos para conocer la fecha de defecto
+book buffer [TAMBUFF];
+sem_t sem, elements, blanks;
+int prod = 0, cons = 0;
+
+
+void takeRequest (book *buff){
+
+   book bookTemp, *pointerBuffer;
+   pointerBuffer = buff;
+
+
+   while (1){
+
+      sem_wait(&elements);
+      sem_wait(&sem);
+      memcpy(&bookTemp, &pointerBuffer[cons], sizeof(book));
+      pointerBuffer[cons].ISBN = 0;
+      cons = (cons + 1)%TAMBUFF;
+      if (bookTemp.ISBN == -1){
+         sem_post(&sem);
+         sem_post(&blanks);
+         break;
+      }
+      else{
+         //funcion de modificar la base de datos
+         sem_post(&sem);
+         sem_post(&blanks);
+      }
+   }
+
+   printf("El hilo auxiliar termina\n");
+   pthread_exit (NULL);
+
+}
+
+void putRequest (book *bookrequest){
+
+   sem_wait (&blanks);
+   sem_wait(&sem);
+   if (buffer[prod].ISBN == 0)
+      memcpy(&buffer[prod], bookrequest, sizeof(book));
+   prod = (prod + 1)%TAMBUFF;
+   sem_post(&sem);
+   sem_post(&elements);
+}  
+
 
 /*
 Name : tokDataRequest
@@ -192,14 +242,14 @@ void requestBook (book *bookRequest, int fd){
          for(int j = 0; j < dataBase[i].stocks; j++){
 
             if(dataBase[i].requests[j].operation == 'D'){
-
+               
+               printf("\tSe escribe la respuesta al PS solicitud\n");
+               sendAnswer(bit, fd);
                dataBase[i].requests[j].operation = 'P';
                dataBase[i].requests[j].initialDate.day = tm.tm_mday;
                dataBase[i].requests[j].initialDate.month = (tm.tm_mon + 1);
                dataBase[i].requests[j].initialDate.year = (tm.tm_year + 1900);
                bit = 1;
-               printf("\tSe escribe la respuesta al PS solicitud\n");
-               sendAnswer(bit, fd);
                return;                
             }
          }
@@ -255,14 +305,14 @@ void returnBook (book *bookRequest, int fd){
          for(int j = 0; j < dataBase[i].stocks; j++){
 
             if(dataBase[i].requests[j].operation == 'P'){
-
-               dataBase[i].requests[j].operation = 'D';
+               
+               printf("\tSe escribe la respuesta al PS solicitud\n");
+               sendAnswer(bit, fd);
+/*             dataBase[i].requests[j].operation = 'D';
                dataBase[i].requests[j].initialDate.day = tm.tm_mday;
                dataBase[i].requests[j].initialDate.month = (tm.tm_mon + 1);
                dataBase[i].requests[j].initialDate.year = (tm.tm_year + 1900);
-               bit = 1;
-               printf("\tSe escribe la respuesta al PS solicitud\n");
-               sendAnswer(bit, fd);
+               bit = 1; */
                return;                
             }
          }
@@ -316,8 +366,11 @@ void renovateBook (book *bookRequest, int fd){
          for(int j = 0; j < dataBase[i].stocks; j++){
 
             if(dataBase[i].requests[j].operation == 'P' && dataBase[i].requests[j].initialDate.day == dateDefault.day){
+               
+               printf("\tSe escribe la respuesta al PS solicitud\n");
+               sendAnswer(bit, fd);
 
-               dataBase[i].requests[j].operation = 'R';
+               /* dataBase[i].requests[j].operation = 'R';
                dataBase[i].requests[j].initialDate.day = tm.tm_mday;
                dataBase[i].requests[j].initialDate.month = (tm.tm_mon + 1);
                dataBase[i].requests[j].initialDate.year = (tm.tm_year + 1900);
@@ -338,9 +391,7 @@ void renovateBook (book *bookRequest, int fd){
                else{
                   dataBase[i].requests[j].initialDate.day += 7;
                }
-               bit = 1;
-               printf("\tSe escribe la respuesta al PS solicitud\n");
-               sendAnswer(bit, fd);
+               bit = 1; */
                return;                
             }
          }
@@ -398,6 +449,10 @@ int main (int argc, char *argv[]){
    int  fd, fd1, bytes,create = 0;
    book bookRequest;
    mode_t fifo_mode = S_IRUSR | S_IWUSR;
+   pthread_t thread;
+   sem_init (&sem,0,1);
+   sem_init(&blanks, 0, TAMBUFF);
+   sem_init (&elements, 0, 0);
 
    readDataBase(argv[4]);
    printf("\n");
@@ -414,6 +469,12 @@ int main (int argc, char *argv[]){
    printf("\t---------------------------------------------\n");
    printf("\tSe crea el pipe %s para recibir solicitud\n", argv[2]);
    printf("\t---------------------\n");
+   
+   for (int i = 0; i < TAMBUFF; i ++)
+      buffer[i].ISBN = 0;
+
+   pthread_create (&thread, NULL, (void *) takeRequest, (void *)buffer);
+
    unlink(argv[2]);
    if (mkfifo (argv[2], fifo_mode) == -1) {
       perror("\tReceptor mkfifo");
@@ -477,8 +538,11 @@ int main (int argc, char *argv[]){
          printf("\tAccion no se puede realizar\n");
          break;
       }
-
+      putRequest (&bookRequest);
    }while(bytes > 0);
+
+   bookRequest.ISBN = -1;
+   putRequest (&bookRequest);
    printf("\t------------------------\n");
    printf("\t----------------\n");
    for (int i = 0; i < posData; i ++){
