@@ -62,7 +62,6 @@ void putRequest (book *bookrequest){
    sem_post(&elements);
 }  
 
-
 /*
 Name : tokDataRequest
 Parameters: char *line, int stoks
