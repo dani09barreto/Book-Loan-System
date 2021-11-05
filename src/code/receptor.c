@@ -27,7 +27,6 @@ void takeRequest (book *buff){
    book bookTemp, *pointerBuffer;
    pointerBuffer = buff;
 
-
    while (1){
 
       sem_wait(&elements);
@@ -45,10 +44,8 @@ void takeRequest (book *buff){
 
          case 'D':
             returnBook (&bookTemp, fdAnswer);
-            printf("a D\n");
             break;
          case 'R':
-            printf("a R\n");
             renovateBook(&bookTemp, fdAnswer);
          default:
             break;
@@ -57,9 +54,6 @@ void takeRequest (book *buff){
          sem_post(&blanks);
       }
    }
-
-   printf("El hilo auxiliar termina\n");
-   pthread_exit (NULL);
 
 }
 
@@ -429,7 +423,7 @@ int main (int argc, char *argv[]){
       printf("\tej: ./debug/receptor –p debug/pipeReceptor –f files/filedatos –s filesalida\n");
       exit (0);
    }
-   printf("hola\n");
+   
    int  fd, fdAnswer, bytes,create = 0;
    book bookRequest;
    mode_t fifo_mode = S_IRUSR | S_IWUSR;
@@ -541,7 +535,9 @@ int main (int argc, char *argv[]){
       }
    }
    makeFile(argv[6]);
-   printf("\tel proceso termino\n");
+   printf("El hilo auxiliar termina\n");
+   pthread_exit (NULL);
+   printf("\tEl proceso termino\n");
    close(fd);
    exit(0);
 }

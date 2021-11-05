@@ -65,9 +65,7 @@ void readFile(char *nameFile){
    while(fgets(line, sizeof(line), fd)){
       tokLine(line);
    } 
-
 }
-
 
 /*
 Name : createRequest
@@ -125,18 +123,20 @@ void createRequest (char *namepipe, book bookRequest, int fd){
 int main (int argc, char *argv[]){
 
 
-  if (argc != 5){
-    perror("\tNumero de argumentos invalidos\n");
-    printf("\tej: ./debug/center –i files/PS.txt –p debug/pipeReceptor \n");
-    exit (0);
-  }
+   if (argc != 5){
+      perror("\tNumero de argumentos invalidos\n");
+      printf("\tej: ./debug/center –i files/PS.txt –p debug/pipeReceptor \n");
+      exit (0);
+   }
    
    int option;
    int optionMenu;
    int fd, create = 0;
    book bookRequest;
    mode_t fifo_mode = S_IRUSR | S_IWUSR;
+   sprintf(namePS, "debug/PS#%i", getpid());
 
+   //comprobar si argc es 2 se entran los valores por consola pero si es 4 se lee el archivo y no se pregunta el menu
    printf("\n");
    printf("\t___Welcome to BookTime___\n");
    printf("\t1. Leer el archivo\n");
@@ -149,7 +149,7 @@ int main (int argc, char *argv[]){
    
    unlink(namePS); 
    if (mkfifo (namePS, fifo_mode) == -1) {
-      perror("\t[!] Request mkfifo");
+      perror("\t[!]Request mkfifo");
       exit(1);
    }
 
