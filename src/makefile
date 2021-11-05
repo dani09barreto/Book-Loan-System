@@ -1,10 +1,10 @@
 all: debug/receptor debug/center 
 
 debug/receptor: debug/receptor.o code/book.h
-	gcc -o debug/receptor debug/receptor.o
+	gcc -o debug/receptor debug/receptor.o -lpthread
 
 debug/receptor.o: code/receptor.c code/book.h
-	gcc -c code/receptor.c
+	gcc -c code/receptor.c -lpthread
 
 debug/center: debug/commandCenter.o code/book.h
 	gcc -o debug/center debug/commandCenter.o
