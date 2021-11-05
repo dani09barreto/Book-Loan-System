@@ -19,6 +19,7 @@ date dateDefault; // Esta variable se define cada vez que se lee la base de dato
 book buffer [TAMBUFF];
 sem_t sem, elements, blanks;
 int prod = 0, cons = 0;
+int fdAnswer;
 
 
 void takeRequest (book *buff){
@@ -40,7 +41,18 @@ void takeRequest (book *buff){
          break;
       }
       else{
-         //funcion de modificar la base de datos
+         switch (bookTemp.operation){
+
+         case 'D':
+            returnBook (&bookTemp, fdAnswer);
+            printf("a D\n");
+            break;
+         case 'R':
+            printf("a R\n");
+            renovateBook(&bookTemp, fdAnswer);
+         default:
+            break;
+         }
          sem_post(&sem);
          sem_post(&blanks);
       }
@@ -242,13 +254,13 @@ void requestBook (book *bookRequest, int fd){
 
             if(dataBase[i].requests[j].operation == 'D'){
                
-               printf("\tSe escribe la respuesta al PS solicitud\n");
-               sendAnswer(bit, fd);
                dataBase[i].requests[j].operation = 'P';
                dataBase[i].requests[j].initialDate.day = tm.tm_mday;
                dataBase[i].requests[j].initialDate.month = (tm.tm_mon + 1);
                dataBase[i].requests[j].initialDate.year = (tm.tm_year + 1900);
                bit = 1;
+               printf("\tSe escribe la respuesta al PS solicitud\n");
+               sendAnswer(bit, fd);
                return;                
             }
          }
@@ -280,7 +292,6 @@ void returnBook (book *bookRequest, int fd){
 
    int make = 0;
    int count = 0;
-   int bit = 0;
    time_t t = time(NULL);
    struct tm tm = *localtime(&t);
 
@@ -304,28 +315,16 @@ void returnBook (book *bookRequest, int fd){
          for(int j = 0; j < dataBase[i].stocks; j++){
 
             if(dataBase[i].requests[j].operation == 'P'){
-               
-               printf("\tSe escribe la respuesta al PS solicitud\n");
-               sendAnswer(bit, fd);
-/*             dataBase[i].requests[j].operation = 'D';
+
+               dataBase[i].requests[j].operation = 'D';
                dataBase[i].requests[j].initialDate.day = tm.tm_mday;
                dataBase[i].requests[j].initialDate.month = (tm.tm_mon + 1);
                dataBase[i].requests[j].initialDate.year = (tm.tm_year + 1900);
-               bit = 1; */
+
                return;                
             }
          }
-         if (bit == 0){
-            printf("\t Se escribe la respuesta al PS solicitud\n");
-            sendAnswer(bit, fd);
-            return;
-         }
       }
-      count++;
-   }
-   if(posData == count){
-      printf("\t Se escribe la respuesta al PS solicitud\n");
-      sendAnswer(bit, fd);
    }
 }
 
@@ -366,10 +365,7 @@ void renovateBook (book *bookRequest, int fd){
 
             if(dataBase[i].requests[j].operation == 'P' && dataBase[i].requests[j].initialDate.day == dateDefault.day){
                
-               printf("\tSe escribe la respuesta al PS solicitud\n");
-               sendAnswer(bit, fd);
-
-               /* dataBase[i].requests[j].operation = 'R';
+               dataBase[i].requests[j].operation = 'R';
                dataBase[i].requests[j].initialDate.day = tm.tm_mday;
                dataBase[i].requests[j].initialDate.month = (tm.tm_mon + 1);
                dataBase[i].requests[j].initialDate.year = (tm.tm_year + 1900);
@@ -390,23 +386,12 @@ void renovateBook (book *bookRequest, int fd){
                else{
                   dataBase[i].requests[j].initialDate.day += 7;
                }
-               bit = 1; */
+
                return;                
             }
          }
-         if (bit == 0){
-            printf("\t Se escribe la respuesta al PS solicitud\n");
-            sendAnswer(bit, fd);
-            return;
-         }
       }
-      count++;
    }
-   if(posData == count){
-      printf("\tSe escribe la respuesta al PS solicitud\n");
-      sendAnswer(bit, fd);
-   }
-
 }
 
 /*
@@ -444,8 +429,8 @@ int main (int argc, char *argv[]){
       printf("\tej: ./debug/receptor –p debug/pipeReceptor –f files/filedatos –s filesalida\n");
       exit (0);
    }
-
-   int  fd, fd1, bytes,create = 0;
+   printf("hola\n");
+   int  fd, fdAnswer, bytes,create = 0;
    book bookRequest;
    mode_t fifo_mode = S_IRUSR | S_IWUSR;
    pthread_t thread;
@@ -457,6 +442,7 @@ int main (int argc, char *argv[]){
    printf("\n");
    printf("\tSe leyo de la BD\n");
    printf("\t----------------\n");
+
    for (int i = 0; i < posData; i ++){
       printf ("\t%s %i %i\n", dataBase[i].name, dataBase[i].ISBN, dataBase[i].stocks);
       for(int j = 0; j < dataBase[i].stocks; j ++){
@@ -515,7 +501,7 @@ int main (int argc, char *argv[]){
       printf("\tPipe: %s\n", bookRequest.secondpipe);
       
       do { 
-         if ((fd1 = open(bookRequest.secondpipe, O_WRONLY)) == -1) {
+         if ((fdAnswer = open(bookRequest.secondpipe, O_WRONLY)) == -1) {
             perror("\tReceptor Abriendo el segundo pipe\n");
             printf("\tSe volvera a intentar despues\n");
             sleep(5);
@@ -525,25 +511,29 @@ int main (int argc, char *argv[]){
       switch (bookRequest.operation){
 
       case 'P':
-         requestBook(&bookRequest, fd1);
+         requestBook(&bookRequest, fdAnswer);
          break;
       case 'D':
-         returnBook(&bookRequest, fd1);
+         printf("\tSe escribe la respuesta al PS solicitud\n");
+         sendAnswer(1, fdAnswer);
          break;
       case 'R':
-         renovateBook(&bookRequest, fd1);
+         printf("\tSe escribe la respuesta al PS solicitud\n");
+         sendAnswer(1, fdAnswer);
          break;
       default:
          printf("\tAccion no se puede realizar\n");
          break;
       }
       putRequest (&bookRequest);
+
    }while(bytes > 0);
 
    bookRequest.ISBN = -1;
    putRequest (&bookRequest);
    printf("\t------------------------\n");
    printf("\t----------------\n");
+
    for (int i = 0; i < posData; i ++){
       printf ("\t%s %i %i\n", dataBase[i].name, dataBase[i].ISBN, dataBase[i].stocks);
       for(int j = 0; j < dataBase[i].stocks; j ++){
