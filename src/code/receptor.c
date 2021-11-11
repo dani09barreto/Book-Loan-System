@@ -17,7 +17,7 @@ int posData = 0; // Representa la ubicacion en el arreglo dataBase de los libros
 int posRequest = 0; // Representa la ubicacion de las solicitudes por cada libro.
 date dateDefault; // Esta variable se define cada vez que se lee la base de datos para conocer la fecha de defecto
 book buffer [TAMBUFF];
-sem_t sem, elements, blanks;
+sem_t sem, elements, blanks, semBaseData;
 int prod = 0, cons = 0;
 int fdAnswer;
 
@@ -43,10 +43,14 @@ void takeRequest (book *buff){
          switch (bookTemp.operation){
 
          case 'D':
+            sem_wait(&semBaseData);
             returnBook (&bookTemp, fdAnswer);
+            sem_post(&semBaseData);
             break;
          case 'R':
+            sem_wait(&semBaseData);
             renovateBook(&bookTemp, fdAnswer);
+            sem_post(&semBaseData);
          default:
             break;
          }
@@ -431,6 +435,7 @@ int main (int argc, char *argv[]){
    sem_init (&sem,0,1);
    sem_init(&blanks, 0, TAMBUFF);
    sem_init (&elements, 0, 0);
+   sem_init(&semBaseData, 0, 1);
 
    readDataBase(argv[4]);
    printf("\n");
