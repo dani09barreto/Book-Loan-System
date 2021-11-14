@@ -122,11 +122,11 @@ void createRequest (char *namepipe, book bookRequest, int fd){
 
 int main (int argc, char *argv[]){
 
-
-   if (argc != 5 || argc != 3){
+   printf("%i", argc);
+   if (argc != 5 && argc != 3){
       perror("\tNumero de argumentos invalidos\n");
       printf("\tej: ./debug/center [–i files/PS.txt] –p debug/pipeReceptor \n");
-      printf("[] argumento opcional \n");
+      printf("\t[] argumento opcional \n");
       exit (0);
    }
    
@@ -137,29 +137,28 @@ int main (int argc, char *argv[]){
    mode_t fifo_mode = S_IRUSR | S_IWUSR;
    sprintf(namePS, "debug/PS#%i", getpid());
 
-   //comprobar si argc es 2 se entran los valores por consola pero si es 4 se lee el archivo y no se pregunta el menu
-
-   printf("\tSe crea el pipe %s para recibir la respuesta del receptor\n", namePS);
-   printf("\t---------------------\n");
-   
-   unlink(namePS); 
-   if (mkfifo (namePS, fifo_mode) == -1) {
-      perror("\t[!]Request mkfifo");
-      exit(1);
-   }
-
-   printf("\tSe abre el %s para enviar proceso a realizar\n", argv[4]);
-   printf("\t---------------------\n");
-
-   do { 
-      if ((fd = open(argv[4], O_WRONLY))== -1) {
-         perror("\t[!] Error en la lectura del pipe\n");
-         printf("\tSe volvera a intentar despues\n");
-	      sleep(5);        
-      } else create = 1;
-   } while (create == 0);
-
    if(argc == 5){
+
+      printf("\tSe crea el pipe %s para recibir la respuesta del receptor\n", namePS);
+      printf("\t---------------------\n");
+      
+      unlink(namePS); 
+      if (mkfifo (namePS, fifo_mode) == -1) {
+         perror("\t[!]Request mkfifo");
+         exit(1);
+      }
+
+      printf("\tSe abre el %s para enviar proceso a realizar\n", argv[4]);
+      printf("\t---------------------\n");
+
+      do { 
+         if ((fd = open(argv[4], O_WRONLY))== -1) {
+            perror("\t[!] Error en la lectura del pipe\n");
+            printf("\tSe volvera a intentar despues\n");
+            sleep(5);        
+         } else create = 1;
+      } while (create == 0);
+
       readFile(argv[2]);
       printf("\tse leyo del archivo %s\n", argv[2]);
       for(int i = 0; i < pos; i++){
@@ -176,6 +175,24 @@ int main (int argc, char *argv[]){
          createRequest(argv[4], booksRequests[i], fd);
       }
    } else if(argc == 3){
+
+      printf("\tSe crea el pipe %s para recibir la respuesta del receptor\n", namePS);
+      printf("\t---------------------\n");
+         
+      unlink(namePS); 
+      if (mkfifo (namePS, fifo_mode) == -1) {
+         perror("\t[!]Request mkfifo");
+         exit(1);
+      }
+      printf("\tSe abre el %s para enviar proceso a realizar\n", argv[2]);
+      printf("\t---------------------\n");
+      do { 
+         if ((fd = open(argv[2], O_WRONLY))== -1) {
+            perror("\t[!] Error en la lectura del pipe\n");
+            printf("\tSe volvera a intentar despues\n");
+            sleep(5);        
+         } else create = 1;
+      } while (create == 0);
       do{
          printf("\n");
          printf("\t_______BookTime______\n");
@@ -205,7 +222,7 @@ int main (int argc, char *argv[]){
             printf("\tPipe: %s\n", bookRequest.secondpipe);
             createRequest(argv[4], bookRequest, fd);
             break;
-         case 2:
+            case 2:
             printf("\n");
             printf("\tInserte el nombre del libro\n");
             fflush(stdin);
