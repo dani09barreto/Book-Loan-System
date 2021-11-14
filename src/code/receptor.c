@@ -424,7 +424,7 @@ int main (int argc, char *argv[]){
   
    if (argc != 7){
       perror("\tNumero de argumentos invalidos\n");
-      printf("\tej: ./debug/receptor –p debug/pipeReceptor –f files/filedatos –s filesalida\n");
+      printf("\tej: ./debug/receptor –p debug/pipeReceptor –f files/filedatos –s files/filesalida\n");
       exit (0);
    }
    
