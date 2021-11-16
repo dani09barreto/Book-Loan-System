@@ -1,0 +1,14 @@
+R,Brooklyn Was Mine,5068
+R,Famous Poems,5016
+R,Tuscany in Mind,6059
+R,Selected Works,1119 
+P,Essential Saroyan,6073
+R,Getting Home Alive,1571
+R,So Fey,6229
+R,Death Defying Acts,2484
+R,Getting Home Alive,1571
+R,Ethnic Modernism,3731
+R,Word Virus,4383
+D,Latina,1005
+R,Literary Savannah,1443
+P,Dune,1111

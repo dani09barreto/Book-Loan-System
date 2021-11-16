@@ -1,6 +1,13 @@
-P,African Folktales,5963
-P,Love Child,6829
-R,Love Child,6829
-D,Black Nature,3655
-D,Touch,4980
-P,American Dreams,2841
+D,Beat Poets,1077
+D,Brooklyn Was Mine,5068
+D,Famous Poems,5016
+D,Tuscany in Mind,6059
+D,Selected Works,1119 
+D,Getting Home Alive,1571
+D,So Fey,6229
+D,Death Defying Acts,2484
+D,Ethnic Modernism,3731
+D,Word Virus,4383
+D,Latina,1005
+D,Literary Savannah,1443
+P,Caroling Dusk,5256

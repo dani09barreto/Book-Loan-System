@@ -122,7 +122,6 @@ void createRequest (char *namepipe, book bookRequest, int fd){
 
 int main (int argc, char *argv[]){
 
-   printf("%i", argc);
    if (argc != 5 && argc != 3){
       perror("\tNumero de argumentos invalidos\n");
       printf("\tej: ./debug/center [–i files/PS.txt] –p debug/pipeReceptor \n");

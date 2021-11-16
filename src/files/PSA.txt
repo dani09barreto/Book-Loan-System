@@ -1,4 +1,4 @@
-D,American Dreams,2841
-D,Immigrant Women,2610
-R,Touch,4980
-R,Love Child,6829
+D,Florida Frenzy,4188
+D,Literary Fort Worth,3198
+P,Common Wealth,6704
+P,Literary Nashville,6181

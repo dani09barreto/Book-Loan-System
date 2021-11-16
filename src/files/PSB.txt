@@ -1,0 +1,5 @@
+P,Florida Frenzy,4188
+P,Impossible Princess,6139 
+R,American Reader,3860
+R,American Reader,3860
+P,Common Wealth,6704
